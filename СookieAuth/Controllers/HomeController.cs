@@ -46,25 +46,15 @@ namespace СookieAuth.Controllers
         public async Task<IActionResult> Validate(string username, string password, string returnUrl)
         {
             ViewData["returnUrl"] = returnUrl;
-            if (username == "Bill" && password == "1")
+            if (
+                username == "Bill" && password == "1"
+                || username == "John" && password == "2"
+            )
             {
                 var claims = new List<Claim>
                 {
                     new(ClaimTypes.NameIdentifier, username),
-                    new(ClaimTypes.Name, $"{username} Gates")
-                };
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
-                await HttpContext.SignInAsync(claimsPrincipal);
-                return Redirect(returnUrl);
-            }
-            if (username == "John" && password == "2")
-            {
-                var claims = new List<Claim>
-                {
-                    new(ClaimTypes.NameIdentifier, username),
-                    new(ClaimTypes.Name, $"{username} Connor"),
-                    new(ClaimTypes.Role, "Admin")
+                    new(ClaimTypes.Name, $"{username} {(username == "Bill" ? "Gates" : "Connor")}")
                 };
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);

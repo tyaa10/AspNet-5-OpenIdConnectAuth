@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -32,6 +33,26 @@ namespace СookieAuth
                 {
                     options.LoginPath = "/login";
                     options.AccessDeniedPath = "/denied";
+                    options.Events = new CookieAuthenticationEvents()
+                    {
+                        OnSigningIn = async context =>
+                        {
+                            var principal = context.Principal;
+                            if (principal.HasClaim(c => c.Type == ClaimTypes.NameIdentifier))
+                            {
+                                Console.WriteLine(principal.Claims
+                                    .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
+                                if (principal.Claims
+                                    .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value == "John")
+                                {
+                                    var claimsIdentity = principal.Identity as ClaimsIdentity;
+                                    Console.WriteLine(claimsIdentity);
+                                    claimsIdentity.AddClaim(new(ClaimTypes.Role, "Admin"));
+                                }
+                            }
+                            await Task.CompletedTask;
+                        }
+                    };
                 }
             );
         }
