@@ -38,7 +38,15 @@ namespace СookieAuth.Controllers
         {
             return View();
         }
-
+        [HttpPost("login")]
+        public IActionResult Validate(string username, string password)
+        {
+            if (username == "Bill" && password == "1")
+            {
+                return Ok();
+            }
+            return BadRequest();
+        }
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
