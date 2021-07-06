@@ -28,7 +28,11 @@ namespace СookieAuth
             services.AddAuthentication(
                 CookieAuthenticationDefaults.AuthenticationScheme
             ).AddCookie(
-                options => options.LoginPath = "/login"
+                options =>
+                {
+                    options.LoginPath = "/login";
+                    options.AccessDeniedPath = "/denied";
+                }
             );
         }
 

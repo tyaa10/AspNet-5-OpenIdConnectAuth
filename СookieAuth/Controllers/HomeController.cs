@@ -31,7 +31,7 @@ namespace СookieAuth.Controllers
         {
             return View();
         }
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public IActionResult Secured()
         {
             return View();
@@ -48,9 +48,24 @@ namespace СookieAuth.Controllers
             ViewData["returnUrl"] = returnUrl;
             if (username == "Bill" && password == "1")
             {
-                var claims = new List<Claim>();
-                claims.Add(new Claim(ClaimTypes.NameIdentifier, username));
-                claims.Add(new Claim(ClaimTypes.Name, $"{username} Gates"));
+                var claims = new List<Claim>
+                {
+                    new(ClaimTypes.NameIdentifier, username),
+                    new(ClaimTypes.Name, $"{username} Gates")
+                };
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+                await HttpContext.SignInAsync(claimsPrincipal);
+                return Redirect(returnUrl);
+            }
+            if (username == "John" && password == "2")
+            {
+                var claims = new List<Claim>
+                {
+                    new(ClaimTypes.NameIdentifier, username),
+                    new(ClaimTypes.Name, $"{username} Connor"),
+                    new(ClaimTypes.Role, "Admin")
+                };
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
                 await HttpContext.SignInAsync(claimsPrincipal);
@@ -63,6 +78,11 @@ namespace СookieAuth.Controllers
         {
             await HttpContext.SignOutAsync();
             return Redirect("/");
+        }
+        [HttpGet("denied")]
+        public IActionResult Denied()
+        {
+            return View();
         }
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
