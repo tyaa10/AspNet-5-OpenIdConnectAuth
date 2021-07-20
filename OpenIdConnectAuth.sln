@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "СookieAuth", "СookieAuth\СookieAuth.csproj", "{7F8A4A79-DF8E-4A40-99D3-AE13653DD838}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIdConnectAuth", "OpenIdConnectAuth\OpenIdConnectAuth.csproj", "{7F8A4A79-DF8E-4A40-99D3-AE13653DD838}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

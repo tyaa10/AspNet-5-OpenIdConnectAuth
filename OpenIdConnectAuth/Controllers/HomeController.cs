@@ -9,9 +9,9 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using СookieAuth.Models;
+using OpenIdConnectAuth.Models;
 
-namespace СookieAuth.Controllers
+namespace OpenIdConnectAuth.Controllers
 {
     public class HomeController : Controller
     {

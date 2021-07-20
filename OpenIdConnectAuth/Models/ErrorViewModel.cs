@@ -1,6 +1,6 @@
 using System;
 
-namespace СookieAuth.Models
+namespace OpenIdConnectAuth.Models
 {
     public class ErrorViewModel
     {
