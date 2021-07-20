@@ -64,6 +64,7 @@ namespace OpenIdConnectAuth
                     options.ClientId = "824259445368-7f4dim7eap6c1321n7vv7n728ot3elek.apps.googleusercontent.com";
                     options.ClientSecret = "NPw8O8pZ0ybyLwufcNtD5JKt";
                     options.CallbackPath = "/auth";
+                    options.AuthorizationEndpoint += "?prompt=consent";
                 }
             );
         }
