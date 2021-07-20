@@ -67,7 +67,7 @@ namespace OpenIdConnectAuth.Controllers
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync();
-            return Redirect("/");
+            return Redirect(@"https://accounts.google.com/Logout?&continue=https://appengine.google.com/_ah/logout?continue=https://localhost:5001");
         }
         [HttpGet("denied")]
         public IActionResult Denied()
