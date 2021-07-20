@@ -31,7 +31,7 @@ namespace OpenIdConnectAuth.Controllers
         {
             return View();
         }
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public IActionResult Secured()
         {
             return View();

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -27,7 +28,11 @@ namespace OpenIdConnectAuth
         {
             services.AddControllersWithViews();
             services.AddAuthentication(
-                CookieAuthenticationDefaults.AuthenticationScheme
+                options =>
+                {
+                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+                }
             ).AddCookie(
                 options =>
                 {
@@ -38,21 +43,27 @@ namespace OpenIdConnectAuth
                         OnSigningIn = async context =>
                         {
                             var principal = context.Principal;
-                            if (principal.HasClaim(c => c.Type == ClaimTypes.NameIdentifier))
+                            if (principal != null && principal.HasClaim(c => c.Type == ClaimTypes.NameIdentifier))
                             {
                                 Console.WriteLine(principal.Claims
-                                    .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
+                                    .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
                                 if (principal.Claims
-                                    .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value == "John")
+                                    .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value == "John")
                                 {
                                     var claimsIdentity = principal.Identity as ClaimsIdentity;
                                     Console.WriteLine(claimsIdentity);
-                                    claimsIdentity.AddClaim(new(ClaimTypes.Role, "Admin"));
+                                    claimsIdentity?.AddClaim(new(ClaimTypes.Role, "Admin"));
                                 }
                             }
                             await Task.CompletedTask;
                         }
                     };
+                }
+            ).AddGoogle(options =>
+                {
+                    options.ClientId = "824259445368-7f4dim7eap6c1321n7vv7n728ot3elek.apps.googleusercontent.com";
+                    options.ClientSecret = "NPw8O8pZ0ybyLwufcNtD5JKt";
+                    options.CallbackPath = "/auth";
                 }
             );
         }
