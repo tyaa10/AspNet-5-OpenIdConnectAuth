@@ -31,7 +31,7 @@ namespace OpenIdConnectAuth
                 options =>
                 {
                     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = "GoogleOpenID";
                 }
             ).AddCookie(
                 options =>
@@ -59,12 +59,12 @@ namespace OpenIdConnectAuth
                         }
                     };
                 }
-            ).AddGoogle(options =>
+            ).AddOpenIdConnect("GoogleOpenID", options =>
                 {
+                    options.Authority = "https://accounts.google.com";
                     options.ClientId = "824259445368-7f4dim7eap6c1321n7vv7n728ot3elek.apps.googleusercontent.com";
                     options.ClientSecret = "NPw8O8pZ0ybyLwufcNtD5JKt";
                     options.CallbackPath = "/auth";
-                    options.AuthorizationEndpoint += "?prompt=consent";
                 }
             );
         }
