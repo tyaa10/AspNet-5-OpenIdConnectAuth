@@ -69,7 +69,7 @@ namespace OpenIdConnectAuth
                 }
             ).AddOpenIdConnect("OktaOpenID", options =>
             {
-                options.Authority = "https://dev-74961067.okta.com";
+                options.Authority = "https://dev-74961067.okta.com/oauth2/default";
                 options.ClientId = "0oa1cy5fccnOsYPdf5d7";
                 options.ClientSecret = "J7VSbG7DhpBFBxkwHn2vh6C-jt2ClVYvJRhqwJME";
                 options.CallbackPath = "/okta-auth";
