@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace OpenIdConnectAuth
 {
@@ -31,7 +32,7 @@ namespace OpenIdConnectAuth
                 options =>
                 {
                     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = "GoogleOpenID";
+                    options.DefaultChallengeScheme = "OktaOpenID";
                 }
             ).AddCookie(
                 options =>
@@ -66,7 +67,15 @@ namespace OpenIdConnectAuth
                     options.ClientSecret = "NPw8O8pZ0ybyLwufcNtD5JKt";
                     options.CallbackPath = "/auth";
                 }
-            );
+            ).AddOpenIdConnect("OktaOpenID", options =>
+            {
+                options.Authority = "https://dev-74961067.okta.com";
+                options.ClientId = "0oa1cy5fccnOsYPdf5d7";
+                options.ClientSecret = "J7VSbG7DhpBFBxkwHn2vh6C-jt2ClVYvJRhqwJME";
+                options.CallbackPath = "/okta-auth";
+                options.ResponseType = OpenIdConnectResponseType.Code;
+                // options.RequireHttpsMetadata = false;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
