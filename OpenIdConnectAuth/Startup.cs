@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
 using OpenIdConnectAuth.Data;
 using OpenIdConnectAuth.Services;
 
@@ -55,7 +56,22 @@ namespace OpenIdConnectAuth
                                 context.Properties.Items.FirstOrDefault(pair => pair.Key == ".AuthScheme");
                             var claim = new Claim(scheme.Key, scheme.Value);
                             var claimsIdentity = context.Principal?.Identity as ClaimsIdentity;
+                            var userService =
+                                context.HttpContext.RequestServices.GetRequiredService(typeof(UserService))
+                                    as UserService;
+                            var nameIdentifier = claimsIdentity?.Claims
+                                .FirstOrDefault(m => m.Type == ClaimTypes.NameIdentifier)?.Value;
+                            if (userService != null && nameIdentifier != null)
+                            {
+                                var appUser = userService.GetUserByExternalProvider(scheme.Value, nameIdentifier) ??
+                                              userService.AddNewUser(scheme.Value, claimsIdentity.Claims.ToList());
+                                foreach (var r in appUser.RoleList)
+                                {
+                                    claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, r));
+                                }
+                            }
                             claimsIdentity?.AddClaim(claim);
+                            await Task.CompletedTask;
                         }
                     };
                 }
@@ -66,19 +82,10 @@ namespace OpenIdConnectAuth
                     options.ClientSecret = Configuration["GoogleOpenId:ClientSecret"];
                     options.CallbackPath = Configuration["GoogleOpenId:CallbackPath"];
                     // options.SignedOutCallbackPath = Configuration["GoogleOpenId:SignedOutCallbackPath"];
-                    options.SaveTokens = true;
-                    options.Events = new OpenIdConnectEvents
+                    options.SaveTokens = false;
+                    options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        OnTokenValidated = async context =>
-                        {
-                            if (context?.Principal?.Claims
-                                .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value == "107874997097598484236")
-                            {
-                                var claimsIdentity = context.Principal?.Identity as ClaimsIdentity;
-                                claimsIdentity?.AddClaim(new(ClaimTypes.Role, "Admin"));
-                            }
-                            await Task.CompletedTask;
-                        }
+                        NameClaimType = "name",
                     };
                 }
             ).AddOpenIdConnect("OktaOpenID", options =>
@@ -89,7 +96,7 @@ namespace OpenIdConnectAuth
                 options.CallbackPath = Configuration["OktaOpenId:CallbackPath"];
                 options.SignedOutCallbackPath = Configuration["OktaOpenId:SignedOutCallbackPath"];
                 options.ResponseType = OpenIdConnectResponseType.Code;
-                options.SaveTokens = true;
+                options.SaveTokens = false;
                 options.Scope.Add("openid");
                 options.Scope.Add("profile");
                 options.Scope.Add("offline_access");
