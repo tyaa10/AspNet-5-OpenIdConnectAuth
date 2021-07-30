@@ -89,7 +89,6 @@ namespace OpenIdConnectAuth.Controllers
                 return Redirect(@"https://accounts.google.com/Logout?&continue=https://appengine.google.com/_ah/logout?continue=https://localhost:5001");
             }
             return new SignOutResult(new[] {CookieAuthenticationDefaults.AuthenticationScheme, scheme});
-
         }
         [HttpGet("denied")]
         public IActionResult Denied()

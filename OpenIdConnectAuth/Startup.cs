@@ -54,10 +54,12 @@ namespace OpenIdConnectAuth
                 }
             ).AddOpenIdConnect("GoogleOpenID", options =>
                 {
-                    options.Authority = "https://accounts.google.com";
-                    options.ClientId = "824259445368-7f4dim7eap6c1321n7vv7n728ot3elek.apps.googleusercontent.com";
-                    options.ClientSecret = "NPw8O8pZ0ybyLwufcNtD5JKt";
-                    options.CallbackPath = "/auth";
+                    options.Authority = Configuration["GoogleOpenId:Authority"];
+                    options.ClientId = Configuration["GoogleOpenId:ClientId"];
+                    options.ClientSecret = Configuration["GoogleOpenId:ClientSecret"];
+                    options.CallbackPath = Configuration["GoogleOpenId:CallbackPath"];
+                    // options.SignedOutCallbackPath = Configuration["GoogleOpenId:SignedOutCallbackPath"];
+                    options.SaveTokens = true;
                     options.Events = new OpenIdConnectEvents
                     {
                         OnTokenValidated = async context =>
@@ -74,11 +76,11 @@ namespace OpenIdConnectAuth
                 }
             ).AddOpenIdConnect("OktaOpenID", options =>
             {
-                options.Authority = "https://dev-74961067.okta.com/oauth2/default";
-                options.ClientId = "0oa1cy5fccnOsYPdf5d7";
-                options.ClientSecret = "J7VSbG7DhpBFBxkwHn2vh6C-jt2ClVYvJRhqwJME";
-                options.CallbackPath = "/okta-auth";
-                options.SignedOutCallbackPath = "/okta-signout";
+                options.Authority = Configuration["OktaOpenId:Authority"];
+                options.ClientId = Configuration["OktaOpenId:ClientId"];
+                options.ClientSecret = Configuration["OktaOpenId:ClientSecret"];
+                options.CallbackPath = Configuration["OktaOpenId:CallbackPath"];
+                options.SignedOutCallbackPath = Configuration["OktaOpenId:SignedOutCallbackPath"];
                 options.ResponseType = OpenIdConnectResponseType.Code;
                 options.SaveTokens = true;
                 options.Scope.Add("openid");
