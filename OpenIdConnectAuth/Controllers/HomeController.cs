@@ -42,6 +42,17 @@ namespace OpenIdConnectAuth.Controllers
             ViewData["returnUrl"] = returnUrl;
             return View();
         }
+        [HttpGet("login/{provider}")]
+        public IActionResult LoginExternal([FromRoute]string provider, [FromQuery]string returnUrl)
+        {
+            if (User != null && User.Identities.Any(identity => identity.IsAuthenticated))
+            {
+                RedirectToAction("", "Home");
+            }
+            returnUrl = string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl;
+            var authenticationProperties = new AuthenticationProperties {RedirectUri = returnUrl};
+            return new ChallengeResult(provider, authenticationProperties);
+        }
         [HttpPost("login")]
         public async Task<IActionResult> Validate(string username, string password, string returnUrl)
         {
@@ -58,7 +69,12 @@ namespace OpenIdConnectAuth.Controllers
                 };
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
-                await HttpContext.SignInAsync(claimsPrincipal);
+                var items = new Dictionary<string, string>
+                {
+                    {".AuthScheme", CookieAuthenticationDefaults.AuthenticationScheme}
+                };
+                var properties = new AuthenticationProperties(items);
+                await HttpContext.SignInAsync(claimsPrincipal, properties);
                 return Redirect(returnUrl);
             }
             TempData["Error"] = "Error: username or password is invalid.";
@@ -66,8 +82,14 @@ namespace OpenIdConnectAuth.Controllers
         }
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync();
-            return Redirect(@"https://accounts.google.com/Logout?&continue=https://appengine.google.com/_ah/logout?continue=https://localhost:5001");
+            var scheme = User.Claims.FirstOrDefault(claim => claim.Type == ".AuthScheme")?.Value;
+            if (scheme == "GoogleOpenID")
+            {
+                await HttpContext.SignOutAsync();
+                return Redirect(@"https://accounts.google.com/Logout?&continue=https://appengine.google.com/_ah/logout?continue=https://localhost:5001");
+            }
+            return new SignOutResult(new[] {CookieAuthenticationDefaults.AuthenticationScheme, scheme});
+
         }
         [HttpGet("denied")]
         public IActionResult Denied()

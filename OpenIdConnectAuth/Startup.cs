@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -32,7 +33,7 @@ namespace OpenIdConnectAuth
                 options =>
                 {
                     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = "OktaOpenID";
+                    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 }
             ).AddCookie(
                 options =>
@@ -43,20 +44,11 @@ namespace OpenIdConnectAuth
                     {
                         OnSigningIn = async context =>
                         {
-                            var principal = context.Principal;
-                            if (principal != null && principal.HasClaim(c => c.Type == ClaimTypes.NameIdentifier))
-                            {
-                                Console.WriteLine(principal.Claims
-                                    .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
-                                if (principal.Claims
-                                    .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value == "John")
-                                {
-                                    var claimsIdentity = principal.Identity as ClaimsIdentity;
-                                    Console.WriteLine(claimsIdentity);
-                                    claimsIdentity?.AddClaim(new(ClaimTypes.Role, "Admin"));
-                                }
-                            }
-                            await Task.CompletedTask;
+                            var scheme =
+                                context.Properties.Items.FirstOrDefault(pair => pair.Key == ".AuthScheme");
+                            var claim = new Claim(scheme.Key, scheme.Value);
+                            var claimsIdentity = context.Principal?.Identity as ClaimsIdentity;
+                            claimsIdentity?.AddClaim(claim);
                         }
                     };
                 }
@@ -66,6 +58,19 @@ namespace OpenIdConnectAuth
                     options.ClientId = "824259445368-7f4dim7eap6c1321n7vv7n728ot3elek.apps.googleusercontent.com";
                     options.ClientSecret = "NPw8O8pZ0ybyLwufcNtD5JKt";
                     options.CallbackPath = "/auth";
+                    options.Events = new OpenIdConnectEvents
+                    {
+                        OnTokenValidated = async context =>
+                        {
+                            if (context?.Principal?.Claims
+                                .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value == "107874997097598484236")
+                            {
+                                var claimsIdentity = context.Principal?.Identity as ClaimsIdentity;
+                                claimsIdentity?.AddClaim(new(ClaimTypes.Role, "Admin"));
+                            }
+                            await Task.CompletedTask;
+                        }
+                    };
                 }
             ).AddOpenIdConnect("OktaOpenID", options =>
             {
@@ -73,8 +78,12 @@ namespace OpenIdConnectAuth
                 options.ClientId = "0oa1cy5fccnOsYPdf5d7";
                 options.ClientSecret = "J7VSbG7DhpBFBxkwHn2vh6C-jt2ClVYvJRhqwJME";
                 options.CallbackPath = "/okta-auth";
+                options.SignedOutCallbackPath = "/okta-signout";
                 options.ResponseType = OpenIdConnectResponseType.Code;
-                // options.RequireHttpsMetadata = false;
+                options.SaveTokens = true;
+                options.Scope.Add("openid");
+                options.Scope.Add("profile");
+                options.Scope.Add("offline_access");
             });
         }
 
