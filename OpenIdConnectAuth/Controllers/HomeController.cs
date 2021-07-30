@@ -10,16 +10,19 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using OpenIdConnectAuth.Models;
+using OpenIdConnectAuth.Services;
 
 namespace OpenIdConnectAuth.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly UserService _userService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, UserService userService)
         {
             _logger = logger;
+            _userService = userService;
         }
 
         public IActionResult Index()
@@ -56,17 +59,10 @@ namespace OpenIdConnectAuth.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Validate(string username, string password, string returnUrl)
         {
+            returnUrl = string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl;
             ViewData["returnUrl"] = returnUrl;
-            if (
-                username == "Bill" && password == "1"
-                || username == "John" && password == "2"
-            )
+            if (_userService.TryValidateUser(username, password, out List<Claim> claims))
             {
-                var claims = new List<Claim>
-                {
-                    new(ClaimTypes.NameIdentifier, username),
-                    new(ClaimTypes.Name, $"{username} {(username == "Bill" ? "Gates" : "Connor")}")
-                };
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
                 var items = new Dictionary<string, string>

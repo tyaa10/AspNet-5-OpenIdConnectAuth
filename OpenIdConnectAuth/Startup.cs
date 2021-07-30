@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using OpenIdConnectAuth.Data;
+using OpenIdConnectAuth.Services;
 
 namespace OpenIdConnectAuth
 {
@@ -34,6 +35,7 @@ namespace OpenIdConnectAuth
             services.AddDbContext<AuthDbContext>(
                 options => options.UseSqlite(Configuration.GetConnectionString("DefaultConnection"))
             );
+            services.AddScoped<UserService>();
             services.AddAuthentication(
                 options =>
                 {
